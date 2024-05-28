@@ -8,7 +8,7 @@ import fs from "fs";
 
 const openai = new OpenAI({
   apiKey: process.env.API_KEY,
-  organization: "org-8GTfus835C3XYo3rnWLjorY4",
+  organization: process.env.ORGANISATION,
 });
 
 const __filename = fileURLToPath(import.meta.url);
