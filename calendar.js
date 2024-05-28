@@ -2,7 +2,7 @@ import { google } from "googleapis";
 
 const calendar = google.calendar({
   version: "v3",
-  auth: "AIzaSyAPb_Xj01pr2FYlO8nOII52OTidljDL9N8",
+  auth: process.env.API_KEY,
 });
 
 const events = await calendar.events
