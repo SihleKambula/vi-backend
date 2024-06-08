@@ -1,22 +1,30 @@
 import express from "express";
 import cors from "cors";
 import multer from "multer";
+import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
 import OpenAI from "openai";
 import fs from "fs";
+import { createNote } from "./firebase/controllers.js";
+
+dotenv.config();
+
+const { OPEN_API_KEY, ORGANISATION } = process.env;
 
 const openai = new OpenAI({
-  apiKey: process.env.API_KEY,
-  organization: process.env.ORGANISATION,
+  apiKey: OPEN_API_KEY,
+  organization: ORGANISATION,
 });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//middleware
 const app = express();
 app.use(cors());
 
+//storing voice recordings
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
     callback(null, __dirname + "/voicenotes");
@@ -28,27 +36,29 @@ const storage = multer.diskStorage({
 
 const events = multer({ storage: storage });
 
+//PORT number
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serving running on port:${PORT} `);
 });
 
-app.get("/mindr", (req, res) => {
+//Getting data
+app.get("/vi", (req, res) => {
   res.send({
     message: "Hello from the backend",
   });
 });
 
-// post request to AI
-app.post("/mindr", events.any(), async (req, res) => {
+// Transcribing voice note to text
+app.post("/vi", events.any(), async (req, res) => {
   try {
     const transciption = await openai.audio.transcriptions.create({
       model: "whisper-1",
       file: fs.createReadStream(req.files[0].path),
     });
+    await createNote(transciption.text);
     console.log({ data: transciption.text });
-    res.json({ data: transciption.text });
-    return true;
+    res.status(200).send("product created successfully");
 
     // open dialog
     // const response = await openai.chat.completions.create({
@@ -62,5 +72,8 @@ app.post("/mindr", events.any(), async (req, res) => {
     // });
     // const data = JSON.parse(response.choices[0].message.content);
     // console.log(data);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    res.status(400).send(error.message);
+  }
 });
