@@ -10,11 +10,12 @@ import {
 const db = getFirestore(firebase);
 const timeStamp = serverTimestamp();
 
-export const createNote = async (transcribedData) => {
+export const createNote = async (transcribedData, uid) => {
   try {
     const data = {
       transcript: transcribedData,
       createdAt: timeStamp,
+      userID: uid,
     };
     await addDoc(collection(db, "notes"), data);
     return true;

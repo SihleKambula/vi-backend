@@ -56,24 +56,24 @@ app.post("/vi", events.any(), async (req, res) => {
       model: "whisper-1",
       file: fs.createReadStream(req.files[0].path),
     });
-    await createNote(transciption.text);
+    await createNote(transciption.text, req.body.uid);
     console.log({ data: transciption.text });
     res.status(200).send("product created successfully");
-
-    // open dialog
-    // const response = await openai.chat.completions.create({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "user",
-    //       content: `Return this sentence '${transciption.text}' in json format. Add line breaks where needed`,
-    //     },
-    //   ],
-    // });
-    // const data = JSON.parse(response.choices[0].message.content);
-    // console.log(data);
   } catch (error) {
     console.log(error);
     res.status(400).send(error.message);
   }
 });
+
+// open dialog
+// const response = await openai.chat.completions.create({
+//   model: "gpt-3.5-turbo",
+//   messages: [
+//     {
+//       role: "user",
+//       content: `Return this sentence '${transciption.text}' in json format. Add line breaks where needed`,
+//     },
+//   ],
+// });
+// const data = JSON.parse(response.choices[0].message.content);
+// console.log(data);
